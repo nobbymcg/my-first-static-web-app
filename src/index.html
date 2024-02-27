@@ -710,7 +710,9 @@
                 isPulsing = true;
                 pulseLogo();
 
-                request.open("POST", "http://localhost:8080/verify/"+speakerID);
+                // request.open("POST", "http://localhost:8080/verify/"+speakerID);
+                // Use the Azure hosted middleware
+                request.open("POST", "https://gkmware.azurewebsites.net/api/Verify/"+speakerID);
                 request.send(blob);
                 var response = '';
                 request.onload = function() {
