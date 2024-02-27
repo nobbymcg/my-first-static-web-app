@@ -359,17 +359,20 @@
             visualizationCanvas.height = visualizationCanvas.offsetHeight;
 
             // MediaRecorder variables
-            let mediaRecorder;
+            // let mediaRecorder;
+            let scriptNode;
             let isRecording = false;
-            let recordedChunks = [];
+            let audioBuffer = []; // stores the audio recorded by the scriptNode
             let audioContext;
             let analyser;
-            let dataArray;
+            let dataArray; // used by analyser
             let gkResultCounter = 0;
             let animationFrameId;
             let isPulsing = false;
             let pulseSize = 0;
-
+            let audioSource; // This is the audio source used by the scriptNode and analyser
+            const numChannels = 1;
+            const sampleRate = 48000;
 
             // Load Gatekeeper logo SVG file
             const gatekeeperImg = new Image();
@@ -435,13 +438,15 @@
             }
 
             function pulseLogo() {
-                if (!isPulsing) return;
+                if (!isPulsing){
+                    return;
+                }
 
                 pulseSize = Math.sin(Date.now() / 200) * 25; // adjust numbers for different effects
 
                 drawGatekeeperLogo();
 
-                requestAnimationFrame(pulseLogo);
+                animationFrameId = requestAnimationFrame(pulseLogo);
             }
 
             // Add an onclick event handler to display coordinates
@@ -506,70 +511,84 @@
             });
             
             // Initialise mediaRecorder
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
 
-                    mediaRecorder.ondataavailable = event => {
-                        if (event.data.size > 0) {
-                            recordedChunks.push(event.data);
-                        }
-                    };
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                // Constraints for the getUserMedia function
+                const constraints = {
+                    audio: {
+                        channels: numChannels, // Mono
+                    }
+                };
 
-                    mediaRecorder.onstop = () => {
-                        const blob = new Blob(recordedChunks, { type: 'audio/wav' });
-                        const audioUrl = URL.createObjectURL(blob);
-                        const dateTime = new Date().toLocaleString();
+                // Request access to the user's microphone
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(handleSuccess)
+                    .catch(handleError);
+            } else {
+                console.error('Web Audio API is not supported in this browser.');
+            }
 
-                        // Create a new row in the table
-                        const tableBody = document.getElementById('audioTableBody');
-                        const newRow = tableBody.insertRow(0);
-                        const cell1 = newRow.insertCell(0);
-                        const cell2 = newRow.insertCell(1);
-                        const cell3 = newRow.insertCell(2);
-                        const cell4 = newRow.insertCell(3);
-                        const cell5 = newRow.insertCell(4);
-                        const cell6 = newRow.insertCell(5);
-                        const cell7 = newRow.insertCell(6);
+            // Handle success by setting up MediaRecorder on the stream
+            function handleSuccess(stream) {
+                // Create an AudioContext
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-                        // Set values in the cells
-                        cell1.textContent = dateTime;
-                        cell2.innerHTML = `<audio class="myAudio" controls controlsList="nodownload"><source src="${audioUrl}" type="audio/wav"></audio>`;
-                        var imageHolder = document.createElement('img');
-                        imageHolder.className = 'gkResultWaiting';
-                        imageHolder.id = 'gkResultImage' + gkResultCounter;
-                        imageHolder.src = 'images/hourglass.svg';
-                        imageHolder.width = 20;
-                        var resultText = document.createElement('p');
-                        resultText.id = 'gkResultText' + gkResultCounter;
-                        cell3.innerHTML = imageHolder.outerHTML;
-                        cell4.innerHTML = '...';
-                        cell5.innerHTML = '...';
-                        cell6.innerHTML = `<a href="${audioUrl}" download="recording_${dateTime}.wav"><img width="20px" src="images/download_icon.svg" title="Download Audio"></a>`;
-                        cell7.innerHTML = `<img width="20px" src="images/delete.svg" onclick="deleteRow(this)" title="Delete">`;
+                // Create a media stream source from the microphone
+                audioSource = audioContext.createMediaStreamSource(stream);
 
-                        // Now do the verification
-                        var blobToSend = new Blob(recordedChunks, {type: 'octet/stream;'});
-                        recordedChunks = [];
-                        // Replace the microphone image in the canvas with the Gatekeeper image
-                        drawGatekeeperLogo();
-                        if (verifyWithMiddleware(blobToSend, gkResultCounter++) == 'ERROR') {
-                            console.log("Failed to connect...");
-                        }
-                        
-                    };
+                // Create a script processor node to process the audio
+                scriptNode = audioContext.createScriptProcessor(4096, 1, 1); // bufferSize, inputChannels, outputChannels
 
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
-                    analyser.fftSize = 1024;  // Reduce the buffer size for potential performance improvement
-                    analyser.smoothingTimeConstant = 0.8;
-                    dataArray = new Uint8Array(analyser.fftSize);
+                // Connect the source to the script node
+                audioSource.connect(scriptNode);
 
-                    const source = audioContext.createMediaStreamSource(stream);
-                    source.connect(analyser);
+                // Setup the visualisation using an AnalyserNode
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 1024;  // Reduce the buffer size for potential performance improvement
+                analyser.smoothingTimeConstant = 0.8;
+                dataArray = new Uint8Array(analyser.fftSize);
 
-                })
-                .catch(error => console.error('Error accessing microphone:', error));
+                audioSource.connect(analyser);
+            }
+
+            // Handle error by logging to the console
+            function handleError(error) {
+                console.error('Error accessing microphone:', error);
+            }
+
+            // Update the web page to add a new entry to the audio table
+            function updateAudioTable(audioUrl){
+
+                const dateTime = new Date().toLocaleString();
+
+                // Create a new row in the table
+                const tableBody = document.getElementById('audioTableBody');
+                const newRow = tableBody.insertRow(0);
+                const cell1 = newRow.insertCell(0);
+                const cell2 = newRow.insertCell(1);
+                const cell3 = newRow.insertCell(2);
+                const cell4 = newRow.insertCell(3);
+                const cell5 = newRow.insertCell(4);
+                const cell6 = newRow.insertCell(5);
+                const cell7 = newRow.insertCell(6);
+
+                // Set values in the cells
+                cell1.textContent = dateTime;
+                cell2.innerHTML = `<audio class="myAudio" controls controlsList="nodownload"><source src="${audioUrl}" type="audio/wav"></audio>`;
+                var imageHolder = document.createElement('img');
+                imageHolder.className = 'gkResultWaiting';
+                imageHolder.id = 'gkResultImage' + gkResultCounter;
+                imageHolder.src = 'images/hourglass.svg';
+                imageHolder.width = 20;
+                var resultText = document.createElement('p');
+                resultText.id = 'gkResultText' + gkResultCounter;
+                cell3.innerHTML = imageHolder.outerHTML;
+                cell4.innerHTML = '...';
+                cell5.innerHTML = '...';
+                cell6.innerHTML = `<a href="${audioUrl}" download="recording_${dateTime}.wav"><img width="20px" src="images/download_icon.svg" title="Download Audio"></a>`;
+                cell7.innerHTML = `<img width="20px" src="images/delete.svg" onclick="deleteRow(this)" title="Delete">`;
+            
+            }
 
             // Toggle recording function
             function toggleRecording() {
@@ -586,23 +605,45 @@
 
             // Start recording function
             function startRecording() {
-                // drawMicrophone('#f56558'); // Change circle color to red
-                mediaRecorder.start();
                 isRecording = true;
+                // Connect the script node to the destination (speakers)
+                scriptNode.connect(audioContext.destination);
+                // Callback function to process audio data
+                scriptNode.onaudioprocess = function (audioProcessingEvent) {
+                    const inputBuffer = audioProcessingEvent.inputBuffer;
+                    // Add the audio data to the buffer
+                    audioBuffer.push(new Float32Array(inputBuffer.getChannelData(0)));
+                };
                 drawVisualization();
             }
 
             // Stop recording function
             function stopRecording() {         
-                mediaRecorder.stop();
                 isRecording = false;
+                // Disconnect the scriptNode
+                scriptNode.disconnect(audioContext.destination);
 
                 // Stop the animation frame
                 cancelAnimationFrame(animationFrameId);
 
-                // drawMicrophone('#58f5a2'); // Change circle color back to green
                 resetVisualisation();
+                
+                // Convert the audio buffer to a WAV blob
+                const wavBlob = encodeWAV(audioBuffer);
+                const audioUrl = URL.createObjectURL(wavBlob);
 
+                // reset audioBuffer
+                audioBuffer = [];
+
+                // Update the audio table on the web page
+                updateAudioTable(audioUrl);
+
+                // Now do the verification
+                // Replace the microphone image in the canvas with the Gatekeeper image
+                drawGatekeeperLogo();
+                if (verifyWithMiddleware(wavBlob, gkResultCounter++) == 'ERROR') {
+                    console.log("Failed to connect...");
+                }
             }
 
             function clearCanvas() {
@@ -705,19 +746,15 @@
                 const speakerID = document.getElementById('speakerID').value;
                 // request.open("POST", "http://localhost:8080/verify/"+speakerID+"/TI");
 
-                // Update canvas to show Gatekeeper logo pulsing
-                // drawGatekeeperLogo();
                 isPulsing = true;
                 pulseLogo();
 
-                // request.open("POST", "http://localhost:8080/verify/"+speakerID);
-                // Use the Azure hosted middleware
                 request.open("POST", "https://gkmware.azurewebsites.net/api/Verify/"+speakerID);
                 request.send(blob);
                 var response = '';
                 request.onload = function() {
                     let imageHolder = document.getElementById('gkResultImage' + resultCounter);
-                    // Stop the anumation by changing class of the image from gkResultWaiting to gkResultImage
+                    // Stop the animation by changing class of the image from gkResultWaiting to gkResultImage
                     imageHolder.className = 'gkResultImage';
                     processingState = false;
                     if (request.status == 200) {
@@ -752,6 +789,96 @@
                     // Reset the canvas to show the microphone
                     isPulsing = false;
                     resetVisualisation();
+                }
+
+                request.onerror = function() {
+                    console.error("An error occurred while making the request to Middleware.");
+                    let imageHolder = document.getElementById('gkResultImage' + resultCounter);
+                    // Stop the animation by changing class of the image from gkResultWaiting to gkResultImage
+                    imageHolder.className = 'gkResultImage';
+
+                    // Get the top table row
+                    const tableRow = document.getElementById('audioTableBody').rows[0];
+
+                    processingState = false;
+                    imageHolder.src = 'images/gatekeeper_error.svg';
+                    imageHolder.width = 30;
+                    imageHolder.title = "Failed to connect to middleware";
+                    tableRow.cells[3].innerHTML = '-';
+                    tableRow.cells[4].innerHTML = '-';
+
+                    // Reset the canvas to show the microphone
+                    isPulsing = false;
+                    resetVisualisation();
+                };
+            }
+
+            // Turn the 32 bit float RAW data to a wav file
+            function encodeWAV(audioData) {
+
+                // The audio data has been captured as an array of Float32Array objects
+                // Get the total length of the audio data
+                var totalSamples = 0;
+                for (var i = 0; i < audioData.length; i++) {
+                    totalSamples += audioData[i].length;
+                }
+
+                // Create a single Float32Array object, called samples, to hold the audio data
+                var samples = new Float32Array(totalSamples);
+                var sampleIndex = 0;
+                for (var i = 0; i < audioData.length; i++) {
+                    for (var j = 0; j < audioData[i].length; j++) {
+                        samples[sampleIndex] = audioData[i][j];
+                        sampleIndex++;
+                    }
+                }
+
+                // add wav header and return the resulting wav blob
+                wavBlob = addWavHeader(samples, sampleRate, numChannels);
+                return(wavBlob);
+            }
+
+            function addWavHeader(float32Array, sampleRate, numChannels) {
+                // Calculate the total length of the audio data in bytes
+                const dataSize = float32Array.length * Float32Array.BYTES_PER_ELEMENT;
+
+                // Create a WAV header
+                const buffer = new ArrayBuffer(44 + dataSize);
+                const view = new DataView(buffer);
+
+                // Set the RIFF chunk
+                writeString(view, 0, 'RIFF');
+                view.setUint32(4, 36 + dataSize, true); // Total file size - 8
+
+                writeString(view, 8, 'WAVE');
+
+                // Set the fmt subchunk
+                writeString(view, 12, 'fmt ');
+                view.setUint32(16, 16, true); // Subchunk1Size
+                view.setUint16(20, 3, true); // AudioFormat (3 for IEEE Float)
+                view.setUint16(22, numChannels, true); // NumChannels
+                view.setUint32(24, sampleRate, true); // SampleRate
+                view.setUint32(28, sampleRate * numChannels * Float32Array.BYTES_PER_ELEMENT, true); // ByteRate
+                view.setUint16(32, numChannels * Float32Array.BYTES_PER_ELEMENT, true); // BlockAlign
+                view.setUint16(34, 32, true); // BitsPerSample (32 for Float)
+
+                // Set the data subchunk
+                writeString(view, 36, 'data');
+                view.setUint32(40, dataSize, true); // Subchunk2Size
+
+                // Copy the audio data after the WAV header
+                const audioData = new Float32Array(buffer, 44);
+                audioData.set(float32Array);
+
+                // Create a Blob from the ArrayBuffer
+                const blob = new Blob([buffer], { type: 'audio/wav' });
+
+                return blob;
+            }
+
+            function writeString(view, offset, str) {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
                 }
             }
 
