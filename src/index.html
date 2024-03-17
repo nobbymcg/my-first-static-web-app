@@ -264,15 +264,16 @@
 
         .enrolStatus {
             display: none;
+            color: rgb(42, 42, 250);
             justify-content: center;
             align-items: center;
         }
 
         .container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px;
+            display: flex;
+            /* justify-content: space-between; */
+            align-items: center;
+            padding: 0px;
         }
 
         .hidden {
@@ -287,6 +288,18 @@
             background-color: #ffffff;
         }
 
+        .apiKey {
+            display: flex;
+            align-items: center;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        .apiKey label {
+            margin-right: 5px;
+        }
+
+</style>
 
     </style>
 </head>
@@ -312,8 +325,8 @@
                 <label for="inputField">Speaker ID: </label><input type="text" id="speakerID" placeholder="Speaker ID">
             </div>
             <div id="ConsentCapture" class="hidden">
-                <label for="checkbox">I agree to my recording being used to create a voiceprint</label>
                 <input type="checkbox" id="checkbox">
+                <label for="checkbox">I agree to my recording being used to create a voiceprint</label>
             </div>
         </div>
 
@@ -329,13 +342,8 @@
         </div>
 
         <div class="enrolStatus" id="enrolBlock">
-            <!-- show a check box to provide optin for enrolment -->
-            <!-- Opt-in, by checking this slider you agree for your recording to be used to create a voiceprint.
-            <label class="switch">
-                <input type="checkbox" id="toggleTagId">
-                <span class="slider round"></span> 
-            </label> -->
-            <p id="enrolStatus">&nbsp;</p>
+
+            <p id="enrolStatus">To enrol, just speak for about 20s. You can say whatever you want. For eample, repeat your full name, full address, date of birth, telephone number... anything!</p>
         </div> 
 
         <table id="audioTable">
@@ -375,6 +383,12 @@
             <div id="tagHelpPopup" class="popup">
                 <p>If a TagID is provided then this will be used for verifications and for enrolment.</p>
                 <p>If TagID isn't used then the first voiceprint for that speaker will be used for verifications, and TagID of "TI_10" will be used for enrolments.</p>
+            </div>
+
+            <div class="apiKey">
+                <label for="apiKey">API Key:</label>
+                <input type="password" id="apiKey" name="apiKey" size="25" placeholder="API Key">
+                <!-- <textarea id="apiKey" name="apiKey" rows="4" cols="32"></textarea> -->
             </div>
 
         </div>
@@ -417,9 +431,14 @@
             // Function to open the settings panel
             function toggleSettingsPanel() {
                 if (settingsPanel.classList.contains('open')) {
+                    // Close the panel
                     settingsButton.classList.remove('open');
                     settingsPanel.classList.remove('open');
+                    // Save the apiKey to the cookie
+                    document.cookie = "apiKey=" + document.getElementById('apiKey').value + "; expires=Fri, 31 Dec 2100 12:00:00 UTC; path=/;";
+
                 } else {
+                    // Open the panel
                     settingsButton.classList.add('open');
                     settingsPanel.classList.add('open');
                 }
@@ -532,7 +551,7 @@
                 const mouseX = event.clientX - rect.left;
                 const mouseY = event.clientY - rect.top;
                 const text = document.getElementById('someText');
-                var inzone = "no";
+                // var inzone = "no";
 
                 // alert(`Clicked at coordinates: (${mouseX}, ${mouseY})`);
 
@@ -545,7 +564,12 @@
                 const maxy = centreY + 50;
 
                 if(mouseX > minx && mouseX < maxx && mouseY > miny && mouseY < maxy){
-                    inzone = "yes";
+                    // Check that we have an API Key set otherwise the middleware will not be called
+                    if (document.getElementById('apiKey').value == '') {
+                        alert('Please supply an API Key');
+                        return;
+                    }
+                    // inzone = "yes";
                     // Ensure that a speakerId has been entered
                     if (document.getElementById('speakerID').value == '') {
                         alert('Please enter a Speaker ID');
@@ -561,9 +585,9 @@
                     // Clicked on microphone so toggle recording
                     toggleRecording();
                 }
-                else{
-                    inzone = "no";
-                }
+                // else{
+                //     inzone = "no";
+                // }
                 // text.innerHTML = `Clicked at coordinates: (${mouseX}, ${mouseY}) ${inzone}: ${isRecording}`;
 
             };
@@ -878,7 +902,6 @@
                     // Revert the audio table and hide the enrolStatus block
                     // document.getElementById('audioTable').style.display = oldAudioTableState;
                     document.getElementById('enrolBlock').style.display = 'none';
-                    document.getElementById('enrolStatus').innerHTML = '';
                     document.getElementById('someText').innerHTML = 'Click the Microphone to start verification...';
                     // Hide the consent capture checkbox
                     document.getElementById('ConsentCapture').classList.add('hidden');
@@ -903,6 +926,9 @@
                 processingState = true;
 
                 request.open("POST", "https://gkmware.azurewebsites.net/api/Verify/"+speakerID);
+                // Add the an authorizartion header to the request of the for Bearer <API Key>
+                request.setRequestHeader("Authorization", "Bearer " + document.getElementById('apiKey').value);
+                
                 request.send(blob);
                 var response = '';
                 request.onload = function() {
@@ -988,6 +1014,8 @@
                 processingState = true;
 
                 request.open("POST", "https://gkmware.azurewebsites.net/api/Enrol/"+speakerID+"/"+tagID);
+                // Add the an authorizartion header to the request of the for Bearer <API Key>
+                request.setRequestHeader("Authorization", "Bearer " + document.getElementById('apiKey').value);
                 request.send(blob);
                 var response = '';
                 request.onload = function() {
@@ -1119,17 +1147,32 @@
                 visualizationCanvas.height = visualizationCanvas.offsetHeight;
 
                 // If we are recoring or interacting with the middleware then the canvas will be redrawn automatically
-                // otherwoise redraw it now
+                // otherwise redraw it now
                 if (!isRecording && !isPulsing) {
                     resetVisualisation();
                 }
 
             };
 
+            function getCookie(name) {
+                let nameEQ = name + "=";
+                console.log("document.cookie = " + document.cookie);
+                let ca = document.cookie.split(';');
+                for(var i=0;i < ca.length;i++) {
+                    let c = ca[i];
+                    while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+                }
+                return null;
+            }
+
             window.onload = function() {
                 // Update the canvas width and height
                 // Set oldAudioTableState to the current display state of the audioTable
                 oldAudioTableState = document.getElementById('audioTable').style.display;
+
+                // read the cookie to get the apiKey then set the value of the apiKey input
+                document.getElementById('apiKey').value = getCookie('apiKey');
             };
         </script>
     </main>
