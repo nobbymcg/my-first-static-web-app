@@ -276,10 +276,6 @@
             padding: 0px;
         }
 
-        .hidden {
-            display: none;
-        }
-
         .enrolrow {
             background-color: #e5f2fb;
         }
@@ -299,7 +295,48 @@
             margin-right: 5px;
         }
 
-</style>
+        .hidden {
+            display: none;
+        }
+
+        #popup-container {
+            position: fixed; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #popup-message {
+            position: relative;
+            /* Centering text adjustments */
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            /* Add box shadow */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Add dimensions if not dynamically sized */
+            width: 300px; /* Example width */
+            height: 100px; /* Example height */
+        }
+
+        #popup-close {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
 
     </style>
 </head>
@@ -398,8 +435,37 @@
             <img src="images/settings.svg" width="30px" onclick="toggleSettingsPanel()" alt="Settings" title="Settings">
         </div>
 
+        <!-- Popup Container -->
+        <div id="popup-container" style="display:none;">
+            <!-- Popup Message -->
+            <div id="popup-message">
+                <span id="popup-text">This is an alert message!</span>
+            
+            <!-- Close Button ("X") -->
+            <span id="popup-close" onclick="closePopup()">X</span>
+            </div>
+        </div>
+  
         <script>
     
+            // const popupOverlay = document.getElementById('popup-overlay');
+            const popupMessage = document.getElementById('popup-message');
+            const popupText = document.getElementById('popup-text');
+            const popupClose = document.getElementById('popup-close');
+
+            function showPopup() {
+                document.getElementById('popup-container').style.display = 'flex';
+            }
+
+            function closePopup() {
+                document.getElementById('popup-container').style.display = 'none';
+            }
+
+            function showAlert(message) {
+                popupText.innerHTML = message;
+                showPopup();
+            }
+
             function getFunctionMode() {
                 // Check which of the nav links has the 'clicked' class
                 const navLinks = document.querySelectorAll('nav a');
@@ -551,7 +617,6 @@
                 const mouseX = event.clientX - rect.left;
                 const mouseY = event.clientY - rect.top;
                 const text = document.getElementById('someText');
-                // var inzone = "no";
 
                 // alert(`Clicked at coordinates: (${mouseX}, ${mouseY})`);
 
@@ -566,29 +631,25 @@
                 if(mouseX > minx && mouseX < maxx && mouseY > miny && mouseY < maxy){
                     // Check that we have an API Key set otherwise the middleware will not be called
                     if (document.getElementById('apiKey').value == '') {
-                        alert('Please supply an API Key');
+                        showAlert('Please supply an API Key');
                         return;
                     }
-                    // inzone = "yes";
                     // Ensure that a speakerId has been entered
                     if (document.getElementById('speakerID').value == '') {
-                        alert('Please enter a Speaker ID');
+                        showAlert('Please enter a Speaker ID');
                         return;
                     }
                     // If function is Enrol then check that the consent checkbox is checked
                     if (getFunctionMode() === 'Enrol') {
                         if (!document.getElementById('checkbox').checked) {
-                            alert('Please check the consent checkbox');
+                            showAlert('Please check the consent checkbox');
                             return;
                         }
                     }
                     // Clicked on microphone so toggle recording
                     toggleRecording();
                 }
-                // else{
-                //     inzone = "no";
-                // }
-                // text.innerHTML = `Clicked at coordinates: (${mouseX}, ${mouseY}) ${inzone}: ${isRecording}`;
+
 
             };
 
