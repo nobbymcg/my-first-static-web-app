@@ -4,344 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gatekeeper Web Demo</title>
-    <style>
-        
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(180deg); }
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="quotes.css">
 
-        header {
-            /* background-color: #333; */
-            background-image: url('images/GKBanner3.svg');
-            background-repeat: no-repeat;
-            background-size: cover;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-
-        header h1 {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 40px;
-            font-weight: normal;
-            margin: 15px;
-            color: rgb(29, 14, 137);
-            text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
-        }
-
-        nav {
-            width: 200px;
-            background-color: #f0f0f0;
-            float: left;
-            height: 100vh;
-        }
-
-        nav a {
-            display: block;
-            padding: 15px;
-            text-decoration: none;
-            color: #333;
-            border-bottom: 1px solid #ccc;
-        }
-
-        nav a:hover {
-            background-color: #ddd;
-        }
-
-        nav a.clicked {
-            color: rgb(122, 167, 239); /* Change text color to white */
-            font-weight: bold;
-        }
-
-        main {
-            margin-left: 220px;
-            padding: 20px;
-        }
-
-        main input {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 16px;
-            padding: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        canvas {
-            border: 1px solid #000;
-            display: block;
-            margin: auto;
-        }
-
-        .myAudio {
-            width: 300px;
-            height: 50px;
-        }
-
-        .gkResultWaiting {
-            animation: rotate 0.5s linear infinite;
-        }
-
-        #audioTable {
-            margin-top: 10px;
-            border-collapse: collapse;
-            width: 100%;
-        }
-
-        #audioTable th, #audioTable td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center; /* Center justification */
-        }
-
-        #audioTable th {
-            background-color: #f2f2f2;
-            border-right: none; /* Remove right border for each cell */
-            border-left: none; /* Remove left border for each cell */
-            font-size: 14px;
-        }
-
-        #audioTable td {
-            border-right: none; /* Remove right border for each cell */
-            border-left: none; /* Remove left border for each cell */
-            font-size: 14px;
-        }
-
-        #audioTable td p {
-            line-height: 1.1; /* line height will be 1.1 times the text size */
-        }
-
-        #gkResultImage {
-            height: 30;
-        }
-
-        #audioVisualization {
-            width: 100%;
-            height: 200px;
-        }
-
-        #settings-panel {
-            position: fixed; /* position fixed so it doesn't scroll with the page */
-            right: -330px; /* start off the screen */
-            top: 103px;
-            width: 300px;
-            height: 50%;
-            background: #fff;
-            padding: 15px;
-            border: 1px solid #a7a7a7;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-            border-radius: 4px;
-            transition: right 0.3s ease-in-out;
-        }
-
-        #settings-panel.open {
-            right: 0; /* slide in */
-        }
-
-        #settings-button {
-            position: fixed;
-            right: 0px;
-            top: 103px;
-            height: 40px;
-            width: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #fff;
-            padding: 0;
-            border: 1px solid #a7a7a7;
-            border-radius: 4px;
-            border-right: 4px solid white;
-            transition: right 0.3s ease-in-out;
-        }
-
-        #settings-panel.p {
-            padding: 0;
-            margin: 0;
-        }
-
-        #settings-button.open {
-            right: 328px; /* slide in */
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 30px;
-            height: 20px;
-        }
-
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            -webkit-transition: .4s;
-            transition: .4s;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            -webkit-transition: .4s;
-            transition: .4s;
-        }
-
-        input:checked + .slider {
-            background-color: #2196F3;
-        }
-
-        input:focus + .slider {
-            box-shadow: 0 0 1px #2196F3;
-        }
-
-        input:checked + .slider:before {
-            -webkit-transform: translateX(10px); /* for older chrome based browsers */
-            -ms-transform: translateX(10px); /* for older Microsoft browsers */
-            transform: translateX(10px); /* for modern browsers. (Previous two lines should be redundent) */
-        }
-
-        /* Rounded sliders */
-        .slider.round {
-            border-radius: 34px;
-        }
-
-        .slider.round:before {
-            border-radius: 50%;
-        }
-
-        #tagInfoText {
-            font-size: 60%;
-        }
-
-        .helpIcon {
-            cursor: pointer;
-            width: 20px;
-            height: 20px;
-            stroke: #2196F3;
-        }
-
-        .popup {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            padding: 12px 16px;
-            z-index: 1;
-            border: 1px solid #908f8f;
-            border-radius: 10px; 
-        }
-
-        .timer {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            line-height: 1em; /* 1em is the height of the current font */
-            padding: 0;
-            margin: 0;
-        }
-
-        .enrolStatus {
-            display: none;
-            color: rgb(42, 42, 250);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            display: flex;
-            /* justify-content: space-between; */
-            align-items: center;
-            padding: 0px;
-        }
-
-        .enrolrow {
-            background-color: #e5f2fb;
-        }
-
-        .verifyrow {
-            background-color: #ffffff;
-        }
-
-        .apiKey {
-            display: flex;
-            align-items: flex-start;
-            padding-top: 20px;
-            padding-bottom: 20px;
-        }
-
-        .apiKey label {
-            margin-right: 5px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #popup-container {
-            position: fixed; 
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #popup-message {
-            position: relative;
-            /* Centering text adjustments */
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            text-align: center;
-            /* Add box shadow */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Add dimensions if not dynamically sized */
-            width: 300px; /* Example width */
-            height: 100px; /* Example height */
-        }
-
-        #popup-close {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        #apiKey {
-            resize: none;
-        }
-
-    </style>
 </head>
 <body>
 
@@ -383,7 +48,17 @@
 
         <div class="enrolStatus" id="enrolBlock">
 
-            <p id="enrolStatus">To enrol, just speak for about 20s. You can say whatever you want. For eample, repeat your full name, full address, date of birth, telephone number... anything!</p>
+            <div class="carousel">
+                <div class="carousel-images">
+                    <img src="quotes/matrix.jpg" alt="Image 1" class="carousel-image active">
+                    <img src="quotes/mlk.jpg" alt="Image 2" class="carousel-image active">
+                    <img src="quotes/shakespeare.jpg" alt="Image 3" class="carousel-image active">
+                </div>
+                <a class="prev" onclick="moveSlide(-1)">&#10094;</a>
+                <a class="next" onclick="moveSlide(1)">&#10095;</a>
+            </div>
+
+            <!-- <p id="enrolStatus">To enrol, just speak for about 20s. You can say whatever you want. For eample, repeat your full name, full address, date of birth, telephone number... anything!</p> -->
         </div> 
 
         <table id="audioTable">
@@ -451,6 +126,9 @@
             <span id="popup-close" onclick="closePopup()">X</span>
             </div>
         </div>
+
+        <!-- reference the quotes.js script file -->
+        <script src="quotes.js"></script>
   
         <script>
     
@@ -570,7 +248,7 @@
             let pulseSize = 0;
             let audioSource; // This is the audio source used by the scriptNode and analyser
             const numChannels = 1;
-            const sampleRate = 48000;
+            let sampleRate = 48000;
             let timer;
 
             // Load Gatekeeper logo SVG file
@@ -762,6 +440,16 @@
                 dataArray = new Uint8Array(analyser.fftSize);
 
                 audioSource.connect(analyser);
+
+                // Output details of the audio stream
+                const audioStreamDetails = stream.getAudioTracks()[0].getSettings();
+                // console.log('Audio stream details:', audioStreamDetails);
+                // console.log('Sample rate:', audioStreamDetails.sampleRate);
+
+                // Update sampleRate based on what the microphone is using
+                // this may change so it is re-read in startRecording
+                sampleRate = audioStreamDetails.sampleRate;
+
             }
 
             // Handle error by logging to the console
@@ -854,6 +542,11 @@
                 // Callback function to process audio data
                 scriptNode.onaudioprocess = function (audioProcessingEvent) {
                     const inputBuffer = audioProcessingEvent.inputBuffer;
+                    // Make a note of the sample rate
+                    // It's possible that the microphone has changed, from speakers to headset for example
+                    // and this can result in the samplerate being different from the original value
+                    sampleRate = inputBuffer.sampleRate;
+                    //console.log('Sample rate:', sampleRate);
                     // Add the audio data to the buffer
                     audioBuffer.push(new Float32Array(inputBuffer.getChannelData(0)));
                 };
@@ -995,9 +688,10 @@
                     // Show the enrolStatus block
                     document.getElementById('enrolBlock').style.display = 'flex';
                     // change sometext to prompt for enrolment
-                    document.getElementById('someText').innerHTML = 'Click the Microphone to start enrolment...';
+                    document.getElementById('someText').innerHTML = 'Click the Microphone to start enrolment. You can say whatever you like. The quotes below may help you get started but you may need to say more than one.';
                     // Make the consent capture checkbox visible
                     document.getElementById('ConsentCapture').classList.remove('hidden');
+                    document.getElementById('enrolStatus').style.display = 'block';
                 } else {
                     // Revert the audio table and hide the enrolStatus block
                     // document.getElementById('audioTable').style.display = oldAudioTableState;
@@ -1106,8 +800,8 @@
                 }
 
                 // change the enrolStatus text to show that we are processing
-                const enrolStatus = document.getElementById('enrolStatus');
-                enrolStatus.innerHTML = "Enrolling speaker " + speakerID + " with tag " + tagID + "...";
+                // const enrolStatus = document.getElementById('enrolStatus');
+                // enrolStatus.innerHTML = "Enrolling speaker " + speakerID + " with tag " + tagID + "...";
 
                 isPulsing = true;
                 pulseLogo();
@@ -1148,7 +842,7 @@
                         tableRow.cells[5].innerHTML = "N/A";
                         tableRow.cells[6].innerHTML = "N/A";
 
-                        enrolStatus.innerHTML = jsonResponse.result + " " + jsonResponse.reason;
+                        // enrolStatus.innerHTML = jsonResponse.result + " " + jsonResponse.reason;
 
                     } else {
                         console.log("Middleware returned " + request.status);
@@ -1163,7 +857,7 @@
 
                 request.onerror = function() {
                     console.error("An error occurred while making the request to Middleware.");
-                    enrolStatus.innerHTML = "Failed to connect to middleware";
+                    // enrolStatus.innerHTML = "Failed to connect to middleware";
                     // Reset the canvas to show the microphone
                     isPulsing = false;
                     processingState = false;
