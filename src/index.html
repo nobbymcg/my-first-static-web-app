@@ -685,15 +685,15 @@
                     // If the user has clicked the Enrol link hide the table
                     // oldAudioTableState = document.getElementById('audioTable').style.display;
                     // document.getElementById('audioTable').style.display = 'none';
-                    // Show the enrolStatus block
+                    // Show the enrolBlock
                     document.getElementById('enrolBlock').style.display = 'flex';
                     // change sometext to prompt for enrolment
                     document.getElementById('someText').innerHTML = 'Click the Microphone to start enrolment. You can say whatever you like. The quotes below may help you get started but you may need to say more than one.';
                     // Make the consent capture checkbox visible
                     document.getElementById('ConsentCapture').classList.remove('hidden');
-                    document.getElementById('enrolStatus').style.display = 'block';
+                    // document.getElementById('enrolStatus').style.display = 'block';
                 } else {
-                    // Revert the audio table and hide the enrolStatus block
+                    // Revert the audio table and hide the enrolBlock
                     // document.getElementById('audioTable').style.display = oldAudioTableState;
                     document.getElementById('enrolBlock').style.display = 'none';
                     document.getElementById('someText').innerHTML = 'Click the Microphone to start verification...';
