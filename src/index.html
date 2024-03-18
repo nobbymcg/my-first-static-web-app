@@ -456,7 +456,7 @@
     
             // Code to mask the API Key
             let isMasked = false;
-            let actualContent = '';
+            let unmaskedAPIKey = ''; // This will be the actual text of the APIkey
             const toggleButton = document.getElementById('toggleButton');
 
             const textarea = document.getElementById('apiKey');
@@ -465,26 +465,26 @@
                 if (isMasked) {
                     // Append the new text to actualContent and replace the new text with asterisks
                     const newText = textarea.value.replace(/\*/g, '');
-                    actualContent += newText;
+                    unmaskedAPIKey += newText;
                     textarea.value = textarea.value.replace(/[^*]/g, '*');
                 } else {
-                    actualContent = textarea.value;
+                    unmaskedAPIKey = textarea.value;
                 }
                 // Save the apiKey to the cookie using the actualContent variable (which is not masked)
-                document.cookie = "apiKey=" + actualContent + "; expires=Fri, 31 Dec 2100 12:00:00 UTC; path=/;";
+                document.cookie = "apiKey=" + unmaskedAPIKey + "; expires=Fri, 31 Dec 2100 12:00:00 UTC; path=/;";
 
             });
 
             function toggleAPIView() {
                 if (!isMasked) {
                     // Store the actual content and replace the visible content with asterisks
-                    actualContent = textarea.value;
-                    textarea.value = '*'.repeat(actualContent.length);
+                    unmaskedAPIKey = textarea.value;
+                    textarea.value = '*'.repeat(unmaskedAPIKey.length);
                     isMasked = true;
                     toggleButton.src = 'images/show.svg';
                 } else {
                     // Restore the actual content
-                    textarea.value = actualContent;
+                    textarea.value = unmaskedAPIKey;
                     isMasked = false;
                     toggleButton.src = 'images/hide.svg';
                 }
@@ -576,12 +576,12 @@
             // Load Gatekeeper logo SVG file
             const gatekeeperImg = new Image();
             gatekeeperImg.src = 'images/gatekeeper-nuance-colors.svg';
-            gatekeeperImg.onload = function () {
-                // Draw the Gatekeeper logo onto the canvas
-                console.log("Gatekeeper logo loaded");
+            // gatekeeperImg.onload = function () {
+            //     // Draw the Gatekeeper logo onto the canvas
+            //     // console.log("Gatekeeper logo loaded");
                 
-                // drawGatekeeperLogo();
-            };
+            //     // drawGatekeeperLogo();
+            // };
 
             // Load the microphone SVG file
             const microphoneImg = new Image();
@@ -1027,7 +1027,7 @@
 
                 request.open("POST", "https://gkmware.azurewebsites.net/api/Verify/"+speakerID);
                 // Add the an authorizartion header to the request of the for Bearer <API Key>
-                request.setRequestHeader("Authorization", "Bearer " + document.getElementById('apiKey').value);
+                request.setRequestHeader("Authorization", "Bearer " + unmaskedAPIKey);
                 
                 request.send(blob);
                 var response = '';
@@ -1115,7 +1115,7 @@
 
                 request.open("POST", "https://gkmware.azurewebsites.net/api/Enrol/"+speakerID+"/"+tagID);
                 // Add the an authorizartion header to the request of the for Bearer <API Key>
-                request.setRequestHeader("Authorization", "Bearer " + document.getElementById('apiKey').value);
+                request.setRequestHeader("Authorization", "Bearer " + unmaskedAPIKey);
                 request.send(blob);
                 var response = '';
                 request.onload = function() {
@@ -1272,7 +1272,8 @@
                 oldAudioTableState = document.getElementById('audioTable').style.display;
 
                 // read the cookie to get the apiKey then set the value of the apiKey input
-                document.getElementById('apiKey').value = getCookie('apiKey');
+                unmaskedAPIKey = getCookie('apiKey');
+                document.getElementById('apiKey').value = unmaskedAPIKey;
 
                 // Ensure that the apiKey is masked as the initial state
                 if (!isMasked) {
