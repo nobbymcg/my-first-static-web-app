@@ -23,12 +23,12 @@
     <main>
 
         <h2 id="functionHeader">Verify</h2>
-        <!-- <p><label for="inputField">Speaker ID: </label><input type="text" id="speakerID" placeholder="Speaker ID" value="IanMcG"></p> -->
 
         <div class="container">
             <div id="SpeakerEntry">
                 <label for="inputField">Speaker ID: </label><input type="text" id="speakerID" placeholder="Speaker ID">
             </div>
+            <!-- ConsentCapture only visible during the enrolment process. It makes more sense to be next to speakerID than with the other enrolment elements later. -->
             <div id="ConsentCapture" class="hidden">
                 <input type="checkbox" id="checkbox">
                 <label for="checkbox">I agree to my recording being used to create a voiceprint</label>
@@ -38,16 +38,20 @@
         <!-- <p><label for="inputField">Speaker ID: </label><input type="text" id="speakerID" placeholder="Speaker ID"></p> -->
         <p id="someText">Click the Microphone to start recording.</p>
 
-        <!-- Canvas element -->
-        <!-- <canvas id="audioVisualization" width="400" height="200"></canvas> -->
+        <!-- Canvas element is used to show the recording process and the microphone to start/stop the recording -->
         <canvas id="audioVisualization"></canvas>
 
         <div class="timer">
             <p id="timer">&nbsp;</p>
         </div>
 
-        <div class="enrolStatus" id="enrolBlock">
+        <!-- The enrolBlock contains the elements used in the enrolment process-->
+        <div id="enrolInfo" class="enrolInfo">
+            <p>You will need to speak for about 15s. Try saying one or more of the quotes below.</p>
+        </div>
 
+        <div class="enrolStatus" id="enrolBlock">
+            
             <div class="carousel">
                 <div class="carousel-images">
                     <img src="quotes/satya.jpg" alt="Satya Nadella" class="carousel-image active">
@@ -59,7 +63,7 @@
                 <a class="next" onclick="moveSlide(1)">&#10095;</a>
             </div>
 
-            <!-- <p id="enrolStatus">To enrol, just speak for about 20s. You can say whatever you want. For eample, repeat your full name, full address, date of birth, telephone number... anything!</p> -->
+
         </div> 
 
         <table id="audioTable">
@@ -689,9 +693,10 @@
                     // Show the enrolBlock
                     document.getElementById('enrolBlock').style.display = 'flex';
                     // change sometext to prompt for enrolment
-                    document.getElementById('someText').innerHTML = 'Click the Microphone to start enrolment. You can say whatever you like. The quotes below may help you get started but you may need to say more than one.';
+                    document.getElementById('someText').innerHTML = 'Click the Microphone to start enrolment.';
                     // Make the consent capture checkbox visible
                     document.getElementById('ConsentCapture').classList.remove('hidden');
+                    document.getElementById('enrolInfo').style.display = 'block';
                     // document.getElementById('enrolStatus').style.display = 'block';
                 } else {
                     // Revert the audio table and hide the enrolBlock
@@ -700,6 +705,7 @@
                     document.getElementById('someText').innerHTML = 'Click the Microphone to start verification...';
                     // Hide the consent capture checkbox
                     document.getElementById('ConsentCapture').classList.add('hidden');
+                    document.getElementById('enrolInfo').style.display = 'none';
                 }
             }
 

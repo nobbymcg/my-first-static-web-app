@@ -261,6 +261,16 @@ input:checked + .slider:before {
   align-items: center;
 }
 
+.enrolInfo {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: medium;
+  font-weight: bold;
+  color: darkslategray;
+}
+
 .container {
   display: flex;
   /* justify-content: space-between; */
