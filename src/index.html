@@ -286,7 +286,7 @@
 
         .apiKey {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             padding-top: 20px;
             padding-bottom: 20px;
         }
@@ -337,6 +337,9 @@
             font-size: 20px;
         }
 
+        #apiKey {
+            resize: none;
+        }
 
     </style>
 </head>
@@ -424,8 +427,11 @@
 
             <div class="apiKey">
                 <label for="apiKey">API Key:</label>
-                <input type="password" id="apiKey" name="apiKey" size="25" placeholder="API Key">
+                <textarea id="apiKey" placeholder="Enter APIKey here" rows="8" cols="20"></textarea>
+                <!-- <input type="password" id="apiKey" name="apiKey" size="25" placeholder="API Key"> -->
                 <!-- <textarea id="apiKey" name="apiKey" rows="4" cols="32"></textarea> -->
+                <img src="images/hide.svg" id="toggleButton" alt="hide" height="15px" onclick="toggleAPIView()">
+
             </div>
 
         </div>
@@ -448,6 +454,42 @@
   
         <script>
     
+            // Code to mask the API Key
+            let isMasked = false;
+            let actualContent = '';
+            const toggleButton = document.getElementById('toggleButton');
+
+            const textarea = document.getElementById('apiKey');
+
+            textarea.addEventListener('input', function() {
+                if (isMasked) {
+                    // Append the new text to actualContent and replace the new text with asterisks
+                    const newText = textarea.value.replace(/\*/g, '');
+                    actualContent += newText;
+                    textarea.value = textarea.value.replace(/[^*]/g, '*');
+                } else {
+                    actualContent = textarea.value;
+                }
+                // Save the apiKey to the cookie using the actualContent variable (which is not masked)
+                document.cookie = "apiKey=" + actualContent + "; expires=Fri, 31 Dec 2100 12:00:00 UTC; path=/;";
+
+            });
+
+            function toggleAPIView() {
+                if (!isMasked) {
+                    // Store the actual content and replace the visible content with asterisks
+                    actualContent = textarea.value;
+                    textarea.value = '*'.repeat(actualContent.length);
+                    isMasked = true;
+                    toggleButton.src = 'images/show.svg';
+                } else {
+                    // Restore the actual content
+                    textarea.value = actualContent;
+                    isMasked = false;
+                    toggleButton.src = 'images/hide.svg';
+                }
+            }
+
             // const popupOverlay = document.getElementById('popup-overlay');
             const popupMessage = document.getElementById('popup-message');
             const popupText = document.getElementById('popup-text');
@@ -500,9 +542,6 @@
                     // Close the panel
                     settingsButton.classList.remove('open');
                     settingsPanel.classList.remove('open');
-                    // Save the apiKey to the cookie
-                    document.cookie = "apiKey=" + document.getElementById('apiKey').value + "; expires=Fri, 31 Dec 2100 12:00:00 UTC; path=/;";
-
                 } else {
                     // Open the panel
                     settingsButton.classList.add('open');
@@ -1217,7 +1256,7 @@
 
             function getCookie(name) {
                 let nameEQ = name + "=";
-                console.log("document.cookie = " + document.cookie);
+                // console.log("document.cookie = " + document.cookie);
                 let ca = document.cookie.split(';');
                 for(var i=0;i < ca.length;i++) {
                     let c = ca[i];
@@ -1234,6 +1273,11 @@
 
                 // read the cookie to get the apiKey then set the value of the apiKey input
                 document.getElementById('apiKey').value = getCookie('apiKey');
+
+                // Ensure that the apiKey is masked as the initial state
+                if (!isMasked) {
+                    toggleAPIView();
+                }
             };
         </script>
     </main>
