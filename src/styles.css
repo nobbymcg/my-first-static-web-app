@@ -233,6 +233,7 @@ input:checked + .slider:before {
   stroke: #2196F3;
 }
 
+
 .popup {
   display: none;
   position: absolute;
@@ -259,6 +260,7 @@ input:checked + .slider:before {
   background-color: black;
   justify-content: center;
   align-items: center;
+  position: relative;
 }
 
 .enrolInfo {
@@ -267,8 +269,8 @@ input:checked + .slider:before {
   align-items: center;
   text-align: center;
   font-size: medium;
-  font-weight: bold;
-  color: darkslategray;
+  font-weight: regular;
+  color: rgb(36, 100, 227);
 }
 
 .container {
@@ -284,6 +286,10 @@ input:checked + .slider:before {
 
 .verifyrow {
   background-color: #ffffff;
+}
+
+.spoofrow {
+  background-color: #fcefef;
 }
 
 .apiKey {
@@ -337,8 +343,86 @@ input:checked + .slider:before {
   right: 5px;
   cursor: pointer;
   font-size: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#popup-image {
+  height: 60px;
+  width: 60px;
+}
+
+#whyenrol-container {
+  position: fixed; 
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#whyenrol-img {
+  position: relative;
+  /* Centering text adjustments */
+  background-color: white;
+  padding: 20px;
+  /* border-radius: 5px; */
+  text-align: center;
+  /* Add box shadow */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1); */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Add dimensions if not dynamically sized */
+  /* width: 300px; Example width */
+  height: 50%; /* Example height */
+}
+
+#whyenrol-img img {
+  height: 100%;
+}
+
+#whyenrol-close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  font-size: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#whyEnrolHelp {
+  cursor: pointer;
+  font-weight: bold;
+  color: #2196F3;
+  margin-left: 40px;
 }
 
 #apiKey {
   resize: none;
 }
+
+#checkbox {
+  margin-left: 20px;
+}
+
+#SpeakerEntry {
+  display: flex;
+  align-items: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+#speakerID {
+  margin-left: 5px;
+}
+
+#spoofDetection {
+  align-items: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
