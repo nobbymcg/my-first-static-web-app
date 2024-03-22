@@ -62,11 +62,12 @@ function spoofCheckWithMiddleware(blob, resultCounter) {
             response = jsonResponse.result;
 
             // Parse the response and update the UI
-            if (response == 'OK') {
+            if (response == 'OK' && typeof(jsonResponse.channelPlaybackDetectionResult) != 'undefined') {
                 // Check Synthetic result first
                 // DECISION_NO_RISK_DETECTED
                 // DECISION_FRAUD
                 // DECISION_UNCERTAIN
+                // check if jsonResponse.syntheticSpeechDetectionResult is undefined
                 const synthResponse = jsonResponse.syntheticSpeechDetectionResult;
                 if (synthResponse.decision == 'DECISION_NO_RISK_DETECTED') {
                     // SSD check is ok so now check the playback result
@@ -113,6 +114,11 @@ function spoofCheckWithMiddleware(blob, resultCounter) {
                     reason = synthResponse.reason;
                     risk = 'N/A';
                 }
+            } else {
+                imageHolder.src = 'images/gatekeeper_error.svg';
+                displayText = 'Error';
+                reason = 'Check audio quality';
+                risk = 'N/A';
             }
 
             imageHolder.width = 30;
