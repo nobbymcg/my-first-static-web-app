@@ -101,7 +101,7 @@
                 <span class="slider round"></span>
             </label>
             <label for="tagId">Tag ID:</label>
-            <input type="text" id="tagId" name="tagId" size="10" placeholder="TI_10">
+            <input type="text" id="tagId" name="tagId" size="10" placeholder="Passive">
             <svg class="helpIcon" id="tagIdHelpIcon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g>
                 <circle cx="8" cy="8" r="6.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
@@ -750,8 +750,9 @@
             // and risk scores.
             function verifyWithMiddleware(blob, resultCounter){
                 var request = new XMLHttpRequest();
-                const speakerID = document.getElementById('speakerID').value;
                 // request.open("POST", "http://localhost:8080/verify/"+speakerID+"/TI");
+
+                
 
                 processingState = true;
                 isPulsing = true;
@@ -759,7 +760,16 @@
                 
                 pulseLogo();
 
-                request.open("POST", "https://gkmware.azurewebsites.net/api/Verify/"+speakerID);
+                // Obatin the tagId from the settings panel
+                // Check if the toggleTagId slider is on, if it is then use the tagId from the settings panel
+                const speakerID = document.getElementById('speakerID').value;
+                var reqURL = "https://gkmware.azurewebsites.net/api/Verify/"+speakerID;
+                if (document.getElementById('toggleTagId').checked) {
+                    reqURL += "/" + document.getElementById('tagId').value;
+                }
+
+                // request.open("POST", "https://gkmware.azurewebsites.net/api/Verify/"+speakerID);
+                request.open("POST", reqURL);
                 // Add the an authorizartion header to the request of the for Bearer <API Key>
                 request.setRequestHeader("Authorization", "Bearer " + unmaskedAPIKey);
                 
