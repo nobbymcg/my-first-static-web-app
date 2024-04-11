@@ -42,8 +42,9 @@
         <script src="spoof.js"></script>
 
         <div id="spoofDetection" class="hidden">
-            <label for="file-input">Upload a file to check for spoofing, or record via the microphone below: </label>
-            <input type="file" id="file-input">
+            <label for="file-input">Upload .wav or .mp3 file, or record via the microphone below: </label>
+            <input type="file" id="file-input" accept=".wav,.mp3">
+
             <button type="button" onclick="handleFile()">Check</button>
         </div>
 
@@ -131,7 +132,7 @@
         </div>
 
         <!-- Popup Container -->
-        <div id="popup-container" style="display:none;">
+        <div id="popup-container">
             
             <!-- Popup Message -->
             <div id="popup-message">
@@ -751,8 +752,6 @@
             function verifyWithMiddleware(blob, resultCounter){
                 var request = new XMLHttpRequest();
                 // request.open("POST", "http://localhost:8080/verify/"+speakerID+"/TI");
-
-                
 
                 processingState = true;
                 isPulsing = true;
